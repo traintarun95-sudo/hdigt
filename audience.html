@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>How Did It Go Tonight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0b09;
+    --surface: #141210;
+    --border: rgba(255,255,255,0.07);
+    --amber: #c97f45;
+    --amber-soft: rgba(201,127,69,0.12);
+    --cream: #e8e0d0;
+    --fog: #7a7067;
+    --mist: #a89f93;
+    --dim: #3a3530;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ── STAGE GLOW ── */
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -120px; left: 50%; transform: translateX(-50%);
+    width: 500px; height: 300px;
+    background: radial-gradient(ellipse, rgba(201,127,69,0.08) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .shell {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+
+  /* ── WORDMARK ── */
+  .wordmark {
+    position: fixed; top: 28px; left: 50%; transform: translateX(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fog);
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .wordmark em { color: var(--amber); font-style: normal; }
+
+  /* ── PROGRESS ── */
+  .progress-track {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--dim); z-index: 20;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--amber);
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── CARD ── */
+  .card {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* ── STEP ── */
+  .step {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    animation: stepIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+  .step.active { display: flex; }
+
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── ECHO (Claude's micro-response) ── */
+  .echo {
+    min-height: 52px;
+    margin-bottom: 36px;
+    padding: 0 2px;
+  }
+  .echo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--mist);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .echo-text.visible { opacity: 1; }
+  .echo-cursor {
+    display: inline-block;
+    width: 1px; height: 16px;
+    background: var(--amber);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.9s step-end infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ── QUESTION ── */
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fog);
+    margin-bottom: 12px;
+  }
+  .q-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 5vw, 32px);
+    line-height: 1.25;
+    color: var(--cream);
+    margin-bottom: 8px;
+    font-weight: 300;
+  }
+  .q-hint {
+    font-size: 13px;
+    color: var(--fog);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* ── INPUT ── */
+  .input-wrap { position: relative; }
+
+  textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dim);
+    padding: 12px 0 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: var(--cream);
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    line-height: 1.55;
+    transition: border-color 0.25s;
+    caret-color: var(--amber);
+  }
+  textarea:focus { border-color: var(--amber); }
+  textarea::placeholder {
+    color: var(--dim);
+    font-style: italic;
+  }
+
+  .char-hint {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 8px;
+    text-align: right;
+    transition: color 0.2s;
+  }
+  .char-hint.active { color: var(--fog); }
+
+  /* ── CHIPS ── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .chip {
+    padding: 9px 18px;
+    border-radius: 2px;
+    border: 1px solid var(--dim);
+    font-size: 13px;
+    color: var(--fog);
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    transition: all 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip:hover   { border-color: var(--mist); color: var(--mist); }
+  .chip.on      { border-color: var(--amber); color: var(--amber); background: var(--amber-soft); }
+
+  /* ── ACTIONS ── */
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 36px;
+  }
+  .skip {
+    font-size: 12px;
+    color: var(--fog);
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: none; border: none;
+    font-family: 'Outfit', sans-serif;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .skip:hover { color: var(--mist); }
+
+  .next-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 28px;
+    background: var(--amber);
+    border: none;
+    border-radius: 2px;
+    color: #0c0b09;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .next-btn.ready {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .next-btn.ready:hover {
+    background: #d9905a;
+    transform: translateY(-1px);
+  }
+  .next-btn svg {
+    transition: transform 0.2s;
+  }
+  .next-btn.ready:hover svg { transform: translateX(3px); }
+
+  /* ── SINGLE WORD INPUT ── */
+  .word-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dim);
+    padding: 12px 0 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    color: var(--amber);
+    outline: none;
+    letter-spacing: 0.06em;
+    transition: border-color 0.25s;
+    caret-color: var(--amber);
+  }
+  .word-input:focus { border-color: var(--amber); }
+  .word-input::placeholder { color: var(--dim); font-style: italic; }
+
+  /* ── SUBMIT STEP ── */
+  .submit-step {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .submit-icon {
+    font-size: 40px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: rise 0.6s 0.1s ease forwards;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .submit-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: var(--cream);
+    margin-bottom: 12px;
+    font-weight: 300;
+  }
+  .submit-sub {
+    font-size: 14px;
+    color: var(--fog);
+    line-height: 1.7;
+    max-width: 360px;
+    margin: 0 auto 36px;
+  }
+  .submit-final {
+    padding: 15px 40px;
+    background: transparent;
+    border: 1px solid var(--amber);
+    border-radius: 2px;
+    color: var(--amber);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .submit-final:hover {
+    background: var(--amber-soft);
+  }
+
+  /* ── THANK YOU ── */
+  .thankyou {
+    text-align: center;
+    padding: 20px 0;
+    animation: stepIn 0.6s ease forwards;
+  }
+  .ty-glyph {
+    font-size: 48px;
+    margin-bottom: 24px;
+    display: block;
+  }
+  .ty-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 14px;
+  }
+  .ty-body {
+    font-size: 14px;
+    color: var(--fog);
+    line-height: 1.8;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ── LOADING DOT ── */
+  .thinking {
+    display: flex; gap: 5px; align-items: center;
+    height: 20px;
+  }
+  .thinking span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--fog);
+    animation: pulse 1.2s ease infinite;
+  }
+  .thinking span:nth-child(2) { animation-delay: 0.15s; }
+  .thinking span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes pulse { 0%,80%,100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+</style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+<div class="wordmark">How Did It Go <em>Tonight</em></div>
+
+<div class="shell">
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+// ── QUESTIONS ─────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+  {
+    id: "felt",
+    number: "01 / 04",
+    text: "How did the performance feel to you — in the moment?",
+    hint: "Whatever comes first. There's no wrong answer.",
+    type: "textarea",
+    placeholder: "Start writing…",
+  },
+  {
+    id: "meaning",
+    number: "02 / 04",
+    text: "Did the story or meaning come through clearly for you?",
+    hint: "Not whether you understood it — whether it landed.",
+    type: "textarea",
+    placeholder: "In your own words…",
+  },
+  {
+    id: "word",
+    number: "03 / 04",
+    text: "Leave one word for the company.",
+    hint: "The first one that comes. Honest is more useful than kind.",
+    type: "word",
+    placeholder: "one word",
+  },
+  {
+    id: "stayed",
+    number: "04 / 04",
+    text: "What stayed with you after the performance?",
+    hint: "An image, a feeling, a moment — whatever is still there.",
+    type: "textarea",
+    placeholder: "Something that lingered…",
+  },
+];
+
+// ── SIMULATED ECHOES ──────────────────────────────────────────────────────────
+// These feel like Claude read the answer and responded.
+// When the API is live, getEcho() replaces this pool with a real call.
+
+const ECHO_POOL = {
+  felt: [
+    "That kind of feeling doesn't always have a name.",
+    "Something got through, even if it's hard to place.",
+    "The body often knows before the words do.",
+    "That's the kind of thing that takes time to fully surface.",
+    "Some performances leave a residue. This sounds like one.",
+    "There's something real in what you just described.",
+  ],
+  meaning: [
+    "Meaning doesn't always arrive the same way for everyone in the room.",
+    "Sometimes it's the gaps that carry the most.",
+    "That kind of transmission — partial or full — is worth knowing.",
+    "Whether it landed clearly or not, you felt something. That's data.",
+    "Not every piece of work announces itself. Some ask you to meet it.",
+    "That ambiguity is useful for them to hear.",
+  ],
+  word: [
+    "One word can hold a lot.",
+    "That landed somewhere.",
+    "They'll feel that.",
+    "Precise.",
+    "That's a generous thing to leave them with.",
+    "Honest and specific. The best kind.",
+  ],
+  stayed: [
+    "That's the part that doesn't leave.",
+    "The things that linger are usually the truest signal.",
+    "Something got through.",
+    "That's worth them knowing.",
+    "That image is yours now. It came from somewhere real.",
+    "Residue like that is what the work is actually for.",
+  ],
+};
+
+function pick(pool) {
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+let current = 0;
+let answers  = {};
+let echoTexts = {};
+
+// ── TYPEWRITER ────────────────────────────────────────────────────────────────
+
+function typewrite(el, text, speed = 28) {
+  return new Promise(resolve => {
+    el.textContent = "";
+    el.classList.add("visible");
+    let i = 0;
+    const cursor = document.createElement("span");
+    cursor.className = "echo-cursor";
+    el.appendChild(cursor);
+    const tick = setInterval(() => {
+      el.insertBefore(document.createTextNode(text[i]), cursor);
+      i++;
+      if (i >= text.length) {
+        clearInterval(tick);
+        setTimeout(() => { cursor.remove(); resolve(); }, 400);
+      }
+    }, speed);
+  });
+}
+
+// ── LIVE API CALL ─────────────────────────────────────────────────────────────
+
+const PERFORMANCE_ID = "ba38aab7-42f9-4cf5-8abc-021db419c82a";
+
+async function getEcho(questionId, answer) {
+  try {
+    const q = QUESTIONS.find(q => q.id === questionId);
+    const res = await fetch("/api/echo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q.text, answer }),
+    });
+    const data = await res.json();
+    return data.echo || pick(ECHO_POOL[questionId] || ECHO_POOL.felt);
+  } catch(e) {
+    // Fallback to pool if API fails
+    return pick(ECHO_POOL[questionId] || ECHO_POOL.felt);
+  }
+}
+//   return data.echo;
+// }
+
+// ── RENDER HELPERS ────────────────────────────────────────────────────────────
+
+function setProgress(step, total) {
+  document.getElementById("progress").style.width = `${(step / total) * 100}%`;
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────────────────────
+
+function renderQuestion(index) {
+  const q    = QUESTIONS[index];
+  const card = document.getElementById("card");
+
+  card.innerHTML = `
+    <div class="step active" id="step-${index}">
+
+      <div class="echo" id="echo-zone">
+        ${index === 0
+          ? `<p class="echo-text visible" style="color:var(--fog);font-size:15px;font-family:'Outfit',sans-serif;font-style:normal;letter-spacing:0.01em;">Take a moment. Answer what feels true.</p>`
+          : `<p class="echo-text" id="echo-text"></p>`
+        }
+      </div>
+
+      <div class="q-number">${q.number}</div>
+      <h2 class="q-text">${q.text}</h2>
+      <p class="q-hint">${q.hint}</p>
+
+      ${q.type === "textarea" ? `
+        <div class="input-wrap">
+          <textarea id="answer" placeholder="${q.placeholder}" rows="3"></textarea>
+          <div class="char-hint" id="char-hint">Write freely</div>
+        </div>
+      ` : q.type === "word" ? `
+        <div class="input-wrap">
+          <input type="text" class="word-input" id="answer" placeholder="${q.placeholder}" maxlength="30">
+        </div>
+      ` : ``}
+
+      <div class="actions">
+        <button class="skip" id="skip-btn">Skip</button>
+        <button class="next-btn" id="next-btn">
+          ${index < QUESTIONS.length - 1 ? "Continue" : "Almost done"}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+
+  setProgress(index, QUESTIONS.length + 1);
+
+  const nextBtn = document.getElementById("next-btn");
+  const skipBtn = document.getElementById("skip-btn");
+
+  // If there's a previous echo to show, typewrite it in
+  if (index > 0 && echoTexts[QUESTIONS[index - 1].id]) {
+    const echoEl = document.getElementById("echo-text");
+    typewrite(echoEl, echoTexts[QUESTIONS[index - 1].id], 24);
+  }
+
+  function setReady(val) {
+    answers[q.id] = val;
+    nextBtn.classList.toggle("ready", val.trim().length > 0);
+  }
+
+  if (q.type === "textarea") {
+    const ta   = document.getElementById("answer");
+    const hint = document.getElementById("char-hint");
+    ta.addEventListener("input", () => {
+      const v = ta.value.trim();
+      setReady(v);
+      hint.classList.toggle("active", v.length > 0);
+      hint.textContent = v.length > 0
+        ? `${v.split(/\s+/).filter(Boolean).length} words`
+        : "Write freely";
+    });
+    if (answers[q.id]) { ta.value = answers[q.id]; setReady(answers[q.id]); }
+    setTimeout(() => ta.focus(), 300);
+  }
+
+  if (q.type === "word") {
+    const inp = document.getElementById("answer");
+    inp.addEventListener("input", () => setReady(inp.value));
+    if (answers[q.id]) { inp.value = answers[q.id]; setReady(answers[q.id]); }
+    setTimeout(() => inp.focus(), 300);
+  }
+
+  nextBtn.addEventListener("click", () => advance(q));
+  skipBtn.addEventListener("click", () => { answers[q.id] = ""; advance(q, true); });
+}
+
+// ── ADVANCE ───────────────────────────────────────────────────────────────────
+
+async function advance(q, skipped = false) {
+  const answer  = answers[q.id] || "";
+  const nextBtn = document.getElementById("next-btn");
+  const skipBtn = document.getElementById("skip-btn");
+
+  nextBtn.disabled = true;
+  skipBtn.disabled = true;
+
+  if (!skipped && answer.trim().length > 1) {
+    // Show thinking dots
+    const zone = document.getElementById("echo-zone");
+    zone.innerHTML = `<div class="thinking"><span></span><span></span><span></span></div>`;
+
+    const echo = await getEcho(q.id, answer);
+    echoTexts[q.id] = echo;
+  }
+
+  current++;
+  current < QUESTIONS.length ? renderQuestion(current) : renderSubmit();
+}
+
+// ── SUBMIT SCREEN ─────────────────────────────────────────────────────────────
+
+function renderSubmit() {
+  const card     = document.getElementById("card");
+  const lastId   = QUESTIONS[QUESTIONS.length - 1].id;
+  const lastEcho = echoTexts[lastId] || null;
+
+  setProgress(QUESTIONS.length, QUESTIONS.length + 1);
+
+  card.innerHTML = `
+    <div class="step active">
+      <div class="echo" style="margin-bottom:40px;">
+        ${lastEcho ? `<p class="echo-text" id="final-echo"></p>` : ""}
+      </div>
+      <div class="submit-step">
+        <div class="submit-icon">🕯</div>
+        <h2 class="submit-heading">That's everything.</h2>
+        <p class="submit-sub">Your response is anonymous. The company won't see your words attributed to you — only the pattern of what the room felt tonight.</p>
+        <button class="submit-final" id="submit-final">Send it in</button>
+      </div>
+    </div>
+  `;
+
+  if (lastEcho) {
+    setTimeout(() => {
+      const el = document.getElementById("final-echo");
+      if (el) typewrite(el, lastEcho, 24);
+    }, 200);
+  }
+
+  document.getElementById("submit-final").addEventListener("click", handleSubmit);
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+
+async function handleSubmit() {
+  const btn = document.getElementById("submit-final");
+  btn.textContent = "Sending…";
+  btn.disabled = true;
+
+  try {
+    await fetch("/api/submit-response", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        performance_id: PERFORMANCE_ID,
+        felt:    answers.felt    || "",
+        meaning: answers.meaning || "",
+        word:    answers.word    || "",
+        stayed:  answers.stayed  || "",
+      }),
+    });
+  } catch(e) {
+    console.error("Submit failed:", e);
+  }
+
+  renderThankyou();
+}
+
+// ── THANK YOU ─────────────────────────────────────────────────────────────────
+
+function renderThankyou() {
+  const card = document.getElementById("card");
+  setProgress(QUESTIONS.length + 1, QUESTIONS.length + 1);
+
+  card.innerHTML = `
+    <div class="thankyou">
+      <span class="ty-glyph">✦</span>
+      <h2 class="ty-heading">Thank you.</h2>
+      <p class="ty-body">What you felt tonight helps the work grow in ways that only an audience can make possible.</p>
+    </div>
+  `;
+}
+
+
+// ── ONBOARDING ────────────────────────────────────────────────────────────────
+
+function renderOnboarding() {
+  const card = document.getElementById("card");
+  document.getElementById("progress").style.width = "0%";
+
+  card.innerHTML = `
+    <div class="step active" id="onboarding">
+      <div style="margin-bottom:36px;">
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(24px,5vw,34px);font-weight:300;color:var(--cream);line-height:1.25;margin-bottom:28px;">
+          Tonight's performance,<br>in your words.
+        </h2>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--mist);line-height:1.75;margin-bottom:18px;">
+          You're invited to share how the performance felt to you, while it's still fresh. There's no need to shape it into anything formal.
+        </p>
+        <p style="font-size:13px;color:var(--fog);line-height:1.75;margin-bottom:14px;">
+          This is not a review. It's a shared reading of a moment everyone experienced together, in their own way.
+        </p>
+        <p style="font-size:13px;color:var(--fog);line-height:1.75;margin-bottom:14px;">
+          Your response is anonymous. Nothing you write is attributed to you personally. No right answers, no ratings, no judgments.
+        </p>
+        <p style="font-size:12px;color:var(--fog);line-height:1.75;opacity:0.65;margin-bottom:0;">
+          Responses are combined into a single collective reading through an AI assisted process. Individual responses are not accessed separately once they become part of the overall synthesis.
+        </p>
+      </div>
+      <button id="begin-btn" style="background:none;border:none;padding:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:21px;color:var(--amber);cursor:pointer;letter-spacing:0.04em;display:flex;align-items:center;gap:10px;transition:opacity 0.2s;">
+        Begin
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 8h12M9 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  `;
+
+  document.getElementById("begin-btn").addEventListener("click", () => {
+    const ob = document.getElementById("onboarding");
+    ob.style.transition = "opacity 0.5s ease";
+    ob.style.opacity = "0";
+
+    setTimeout(() => {
+      card.innerHTML = `
+        <div style="animation:stepIn 0.5s ease forwards;">
+          <p id="tline" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--fog);line-height:1.7;opacity:0;transition:opacity 0.6s ease;">
+            Take your time. There is nothing to get right here.
+          </p>
+        </div>
+      `;
+      setTimeout(() => { const t = document.getElementById("tline"); if(t) t.style.opacity="1"; }, 80);
+      setTimeout(() => { const t = document.getElementById("tline"); if(t) { t.style.transition="opacity 0.5s ease"; t.style.opacity="0"; } }, 1900);
+      setTimeout(() => renderQuestion(0), 2500);
+    }, 520);
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderOnboarding();
+</script>
+</body>
+</html>

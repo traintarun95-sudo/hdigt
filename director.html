@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Did It Go Tonight — Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0c0b09;--border:rgba(255,255,255,0.07);--amber:#c97f45;
+  --amber-s:rgba(201,127,69,0.09);--cream:#e8e0d0;--fog:#7a7067;
+  --mist:#a89f93;--dim:#1e1c18;--warn:rgba(180,70,40,0.12);--warn-c:#c07050;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--cream);font-family:'Outfit',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 600px 300px at 50% 100%,rgba(201,127,69,0.06) 0%,transparent 70%);}
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border);background:rgba(12,11,9,0.92);backdrop-filter:blur(16px);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--fog);}
+.nav-logo em{color:var(--amber);font-style:normal;}
+.nav-tabs{display:flex;gap:2px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:4px;padding:3px;}
+.nav-tab{padding:7px 20px;border-radius:3px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--fog);font-family:'Outfit',sans-serif;transition:all 0.2s;white-space:nowrap;}
+.nav-tab:hover{color:var(--mist);}
+.nav-tab.active{background:var(--amber-s);color:var(--amber);}
+.page{display:none;position:relative;z-index:1;}
+.page.active{display:block;animation:fadeUp 0.4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hero{max-width:820px;margin:0 auto;padding:60px 48px 48px;border-bottom:1px solid var(--border);}
+.eyebrow{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,52px);font-weight:300;line-height:1.1;color:var(--cream);}
+.hero-title em{font-style:italic;color:var(--mist);}
+.hero-meta{font-size:13px;color:var(--fog);display:flex;align-items:center;gap:16px;margin-top:16px;}
+.hero-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--fog);}
+.body{max-width:820px;margin:0 auto;padding:52px 48px 80px;}
+.lens{margin-bottom:56px;opacity:0;transform:translateY(12px);animation:lensIn 0.5s ease forwards;}
+.lens:nth-child(1){animation-delay:0.05s}.lens:nth-child(2){animation-delay:0.12s}.lens:nth-child(3){animation-delay:0.19s}.lens:nth-child(4){animation-delay:0.26s}
+@keyframes lensIn{to{opacity:1;transform:none}}
+.lens-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.lens-num{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--fog);}
+.lens-rule{flex:1;height:1px;background:var(--border);}
+.lens-name{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--amber);}
+.lens-body{padding:28px 32px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-left:2px solid var(--amber);border-radius:2px;}
+.lens-body.friction{border-left-color:var(--warn-c);}
+.lens-body.neutral{border-left-color:var(--fog);}
+.lens-sublabel{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--fog);margin-bottom:14px;}
+.lens-prose{font-family:'Cormorant Garamond',serif;font-size:19px;line-height:1.8;color:var(--cream);margin-bottom:20px;}
+.lens-fragments{border-top:1px solid var(--border);padding-top:18px;display:flex;flex-direction:column;gap:10px;}
+.fragment{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--fog);line-height:1.6;padding-left:16px;border-left:1px solid var(--dim);}
+.lens-divergence{margin-top:14px;padding:12px 16px;background:var(--warn);border-radius:2px;font-size:13px;color:var(--warn-c);line-height:1.6;}
+.generate-wrap{display:flex;flex-direction:column;align-items:center;padding:80px 48px;text-align:center;}
+.generate-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--mist);margin-bottom:8px;}
+.generate-sub{font-size:13px;color:var(--fog);margin-bottom:32px;line-height:1.7;max-width:360px;}
+.generate-btn{padding:14px 40px;background:transparent;border:1px solid var(--amber);border-radius:2px;color:var(--amber);font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.generate-btn:hover{background:var(--amber-s);}
+.responses-count{display:inline-flex;align-items:center;gap:8px;margin-bottom:32px;padding:8px 18px;border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--fog);}
+.responses-count strong{color:var(--cream);font-weight:400;}
+
+.run-locked{display:flex;flex-direction:column;align-items:center;padding:80px 48px;text-align:center;}
+.run-locked-glyph{font-size:36px;margin-bottom:24px;opacity:0.4;}
+.run-locked-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--mist);margin-bottom:10px;}
+.run-locked-sub{font-size:13px;color:var(--fog);max-width:340px;line-height:1.7;}
+.run-nights-strip{display:flex;gap:8px;margin-bottom:48px;flex-wrap:wrap;}
+.run-night-pip{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 14px;border:1px solid var(--border);border-radius:2px;font-size:11px;color:var(--fog);min-width:64px;text-align:center;}
+.run-night-pip strong{color:var(--cream);font-weight:400;font-size:13px;}
+
+.thinking{display:flex;gap:6px;align-items:center;padding:40px 0;justify-content:center;}
+.thinking span{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:tpulse 1.2s ease infinite;}
+.thinking span:nth-child(2){animation-delay:0.15s}.thinking span:nth-child(3){animation-delay:0.3s}
+@keyframes tpulse{0%,80%,100%{opacity:0.2}40%{opacity:1}}
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" style="font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fog);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--fog)'">← Production</a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('tonight',this)">Tonight</button>
+    <button class="nav-tab" onclick="showPage('run',this)">The Run</button>
+  </div>
+  <div style="font-size:12px;color:var(--fog);" id="nav-context"></div>
+</nav>
+
+<!-- TONIGHT -->
+<div class="page active" id="page-tonight">
+  <div id="tonight-pre">
+    <div class="hero">
+      <div class="eyebrow">Performance 7 · Tuesday 22 April</div>
+      <h1 class="hero-title">Hamlet<em> — tonight</em></h1>
+      <div class="hero-meta">
+        <span>Barbican Theatre, London</span>
+        <div class="hero-meta-dot"></div>
+        <span>Doors open 19:00</span>
+      </div>
+    </div>
+    <div class="generate-wrap">
+      <div class="responses-count"><strong>14</strong> responses collected so far</div>
+      <p class="generate-label">The room has spoken.</p>
+      <p class="generate-sub">When you're ready to close tonight's window, generate the reading. You can do this now or wait — responses keep coming until you close the link.</p>
+      <button class="generate-btn" onclick="generateReading()">Generate Tonight's Reading</button>
+    </div>
+  </div>
+  <div id="tonight-reading" style="display:none;">
+    <div class="hero">
+      <div class="eyebrow">Performance 7 · Tuesday 22 April · 14 responses</div>
+      <h1 class="hero-title">Hamlet<em> — tonight's reading</em></h1>
+      <div class="hero-meta">
+        <span>Barbican Theatre, London</span>
+        <div class="hero-meta-dot"></div>
+        <span>Reading generated 23:14</span>
+      </div>
+    </div>
+    <div class="body" id="reading-body"></div>
+  </div>
+</div>
+
+
+
+<!-- THE RUN -->
+<div class="page" id="page-run">
+  <div id="run-locked" style="display:none;">
+    <div class="run-locked">
+      <div class="run-locked-glyph">◎</div>
+      <p class="run-locked-text">The run is still finding its shape.</p>
+      <p class="run-locked-sub">Come back after a few more nights. Run insights appear once enough performances have been collected to form a stable pattern.</p>
+    </div>
+  </div>
+  <div id="run-unlocked" style="display:none;">
+    <div class="hero">
+      <div class="eyebrow">Run · Performances 1–7</div>
+      <h1 class="hero-title">How the run <em>has moved</em></h1>
+      <div class="hero-meta"><span>A meta-reading of collective perception across the production</span></div>
+    </div>
+    <div class="body">
+      <div class="run-nights-strip" id="run-strip"></div>
+      <div id="run-layers"></div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+// Read performance_id and show_id from URL
+const params = new URLSearchParams(window.location.search);
+const PERFORMANCE_ID = params.get('performance_id') || "ba38aab7-42f9-4cf5-8abc-021db419c82a";
+const SHOW_NAME = params.get('show_name') || "Tonight";
+const MIN_RUN_NIGHTS = 5;
+
+// Set nav context
+const perfLabel = params.get('perf_label') || '';
+const navCtx = document.getElementById('nav-context');
+if (navCtx && perfLabel) navCtx.textContent = perfLabel;
+
+const PAST_NIGHTS = [
+  {id:1,label:"Performance 1",date:"Wednesday 16 April",responses:11},
+  {id:2,label:"Performance 2",date:"Thursday 17 April",responses:18},
+  {id:3,label:"Performance 3",date:"Friday 18 April",responses:22},
+  {id:4,label:"Performance 4",date:"Saturday 19 April",responses:27},
+  {id:5,label:"Performance 5",date:"Sunday 20 April",responses:16},
+  {id:6,label:"Performance 6",date:"Monday 21 April",responses:19},
+];
+
+const TONIGHT_LENSES = [
+  {
+    num:"01",name:"Overall experience",tone:"resonance",
+    prose:"The room arrived with an unusual attentiveness tonight and largely sustained it through the first half. The dominant register across responses is absorption — audiences describe being held inside the world of the play rather than observing it from outside. The second half shows a mild but consistent drop in this quality, with several responses noting a feeling of the play releasing them before the final scene.",
+    fragments:["Felt entirely inside it for most of the night.","Something shifted in the second half — I came back to myself too early.","The room was very quiet. Not in a bored way. In a held way."],
+    divergence:"A small number of responses report feeling disconnected throughout, citing difficulty tracking the narrative in the early scenes.",
+  },
+  {
+    num:"02",name:"Meaning & clarity",tone:"friction",
+    prose:"Meaning transmission was uneven tonight, with a clear fault line around the midpoint. The early scenes read as coherent and emotionally grounded. After the interval, this coherence weakens. The transition into the Ophelia scenes is the most frequently cited site of confusion — several responses describe a sudden sense of narrative displacement that was not recovered.",
+    fragments:["I understood the first half completely. The second half asked me to trust something I hadn't been given.","The meaning was there — I just couldn't always feel where it was going.","Ophelia's scenes felt like a different register. Not bad. Just unanchored."],
+    divergence:"Two responses describe the second-half ambiguity as intentional and affecting. Confusion was not universally negative.",
+  },
+  {
+    num:"03",name:"Craft integration",tone:"resonance",
+    prose:"The technical elements of tonight's performance were broadly felt as unified. Lighting receives consistent notice — not as spectacle but as atmosphere, functioning below conscious attention in the way craft should. Sound design reads similarly. The ensemble scenes are praised consistently; the solo work in the second half generates more varied reaction.",
+    fragments:["I only noticed the lighting when it changed. That's when I knew it had been working all along.","The ensemble in the court scene was the tightest I've seen it.","Something in the soliloquy felt effortful in a way the rest didn't."],
+    divergence:null,
+  },
+  {
+    num:"04",name:"Residual impact",tone:"resonance",
+    prose:"What the room is carrying out tonight is predominantly imagistic rather than narrative. Responses cluster around specific moments of visual or physical stillness. This convergence on shared images — without prompting — is among the stronger signals that the production landed at a level below conscious processing tonight.",
+    fragments:["I keep seeing the way they arranged themselves at the end. I don't know why.","The pause before the ghost. I was holding my breath and didn't know it until after.","Something about the stillness. It stayed."],
+    divergence:null,
+  },
+];
+
+// ── THE RUN: three corrected layers ──────────────────────────────────────────
+const RUN_LAYERS = [
+  {
+    num:"01",name:"Stability of perception",tone:"resonance",
+    sublabel:"What has settled",
+    prose:"Certain impressions have stabilised across performances and no longer shift meaningfully between nights. The strength of the opening visual language is now a fixed point in audience reception — consistently named, consistently felt, regardless of who is in the room. The emotional register of the first act has also settled: audiences arrive and are held in roughly the same way night after night. These are no longer variables. They are the production's established ground.",
+    fragments:["The opening has stopped surprising people. It has become something they trust.","Whatever the company does in the first twenty minutes — it has landed. Repeatedly."],
+    divergence:null,
+  },
+  {
+    num:"02",name:"Persistent fractures",tone:"friction",
+    sublabel:"What refuses to resolve",
+    prose:"Despite variation in execution across seven nights, confusion around the mid-performance transition persists without exception. This is not a performance-specific issue — it recurs structurally, independent of which audience is present or how the company plays the scene. The fracture appears embedded in the architecture of the work itself: something in how narrative progression is being transmitted is not landing, and no single night has resolved it. This is the most actionable signal the run has produced.",
+    fragments:["The midpoint appears in every reading. The room loses its footing there every time.","This is not about execution. Something structural is asking more than the audience has been given."],
+    divergence:"A small and growing number of later-run responses are beginning to read the fracture as intentional. The interpretation is shifting even if the experience isn't.",
+  },
+  {
+    num:"03",name:"Interpretive drift",tone:"neutral",
+    sublabel:"How understanding is evolving",
+    prose:"Early audiences framed the work as emotionally immediate — something that happened to them. Later audiences increasingly describe it as structurally complex, something they are inside of and reading simultaneously. This is not a change in the performance. It is a change in how the work is being received as its cultural presence grows across the run. The production is beginning to precede itself — later audiences arrive with a different interpretive posture, shaped by what has already been said about it in the rooms and conversations around it.",
+    fragments:["Early nights: 'I felt it.' Later nights: 'I understood what it was doing.'","The work is accumulating meaning outside the theatre. That meaning is now in the room."],
+    divergence:"This drift is not yet universal — some later audiences still arrive clean. But the pattern is directional.",
+  },
+];
+
+function renderLenses(lenses) {
+  return lenses.map(l=>`
+    <div class="lens">
+      <div class="lens-head">
+        <span class="lens-num">${l.num}</span>
+        <div class="lens-rule"></div>
+        <span class="lens-name">${l.name}</span>
+      </div>
+      <div class="lens-body ${l.tone==='friction'?'friction':l.tone==='neutral'?'neutral':''}">
+        ${l.sublabel?`<div class="lens-sublabel">${l.sublabel}</div>`:''}
+        <p class="lens-prose">${l.prose}</p>
+        <div class="lens-fragments">${l.fragments.map(f=>`<p class="fragment">${f}</p>`).join('')}</div>
+        ${l.divergence?`<div class="lens-divergence">↳ ${l.divergence}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function showPage(name,tab) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  tab.classList.add('active');
+  if(name==='past') renderPastList();
+  if(name==='run')  renderRun();
+}
+
+const PERFORMANCE_ID = "ba38aab7-42f9-4cf5-8abc-021db419c82a";
+const SHOW_ID = (async () => {
+  const res = await fetch("https://gbqsuswghstsskvprkvu.supabase.co/rest/v1/performances?id=eq." + PERFORMANCE_ID + "&select=show_id", {
+    headers: {
+      "apikey": "SUPABASE_ANON_KEY_PLACEHOLDER",
+      "Authorization": "Bearer SUPABASE_ANON_KEY_PLACEHOLDER"
+    }
+  });
+  const data = await res.json();
+  return data[0]?.show_id;
+})();
+
+async function generateReading() {
+  document.getElementById('tonight-pre').style.display='none';
+  document.getElementById('tonight-reading').style.display='block';
+  const body=document.getElementById('reading-body');
+  body.innerHTML=`<div class="thinking"><span></span><span></span><span></span></div>`;
+
+  try {
+    const res = await fetch("/api/get-synthesis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ performance_id: PERFORMANCE_ID }),
+    });
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Map API response to TONIGHT_LENSES format
+    const liveLenses = [
+      { num:"01", name:"Overall experience",  tone:"resonance", prose: data.experience_lens, fragments:[], divergence:null },
+      { num:"02", name:"Meaning & clarity",   tone:"friction",  prose: data.meaning_lens,    fragments:[], divergence:null },
+      { num:"03", name:"Craft integration",   tone:"resonance", prose: data.craft_lens,       fragments:[], divergence:null },
+      { num:"04", name:"Residual impact",     tone:"resonance", prose: data.residual_lens,    fragments:[], divergence:null },
+    ];
+
+    body.innerHTML = renderLenses(liveLenses);
+  } catch(e) {
+    // Fallback to simulated data if API fails
+    body.innerHTML = renderLenses(TONIGHT_LENSES);
+    console.error("Synthesis failed:", e);
+  }
+}
+
+
+
+async function renderRun() {
+  const runLocked = document.getElementById('run-locked');
+  const runUnlocked = document.getElementById('run-unlocked');
+  runLocked.style.display='block';
+  runUnlocked.style.display='none';
+
+  try {
+    const showId = await SHOW_ID;
+    const res = await fetch("/api/get-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ show_id: showId }),
+    });
+    const data = await res.json();
+
+    if (data.locked) {
+      runLocked.style.display='block';
+      runUnlocked.style.display='none';
+      return;
+    }
+
+    runLocked.style.display='none';
+    runUnlocked.style.display='block';
+
+    // Night strip
+    const all=[...PAST_NIGHTS,{id:7,label:"Tonight",responses:14}];
+    document.getElementById('run-strip').innerHTML=all.map(n=>`
+      <div class="run-night-pip"><strong>${n.id}</strong><span>${n.responses}r</span></div>`).join('');
+
+    // Run layers from API
+    const liveLayers = [
+      { num:"01", name:"Stability of perception", tone:"resonance", sublabel:"What has settled",       prose: data.stability_layer, fragments:[], divergence:null },
+      { num:"02", name:"Persistent fractures",    tone:"friction",  sublabel:"What refuses to resolve", prose: data.fractures_layer, fragments:[], divergence:null },
+      { num:"03", name:"Interpretive drift",      tone:"neutral",   sublabel:"How understanding is evolving", prose: data.drift_layer, fragments:[], divergence:null },
+    ];
+    document.getElementById('run-layers').innerHTML=renderLenses(liveLayers);
+
+  } catch(e) {
+    // Fallback to simulated
+    runLocked.style.display='none';
+    runUnlocked.style.display='block';
+    const all=[...PAST_NIGHTS,{id:7,label:"Tonight",responses:14}];
+    document.getElementById('run-strip').innerHTML=all.map(n=>`
+      <div class="run-night-pip"><strong>${n.id}</strong><span>${n.responses}r</span></div>`).join('');
+    document.getElementById('run-layers').innerHTML=renderLenses(RUN_LAYERS);
+    console.error("Run failed:", e);
+  }
+}
+
+
+</script>
+</body>
+</html>

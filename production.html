@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Did It Go Tonight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0c0b09;
+  --border:  rgba(255,255,255,0.07);
+  --amber:   #c97f45;
+  --amber-s: rgba(201,127,69,0.09);
+  --cream:   #e8e0d0;
+  --fog:     #7a7067;
+  --mist:    #a89f93;
+  --dim:     #1e1c18;
+  --warn:    rgba(180,70,40,0.12);
+  --warn-c:  #c07050;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 600px 300px at 50% 100%, rgba(201,127,69,0.05) 0%, transparent 70%);
+}
+
+/* ── NAV ── */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 48px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12,11,9,0.92);
+  backdrop-filter: blur(16px);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fog);
+}
+.nav-logo em { color: var(--amber); font-style: normal; }
+
+/* ── HERO ── */
+.hero {
+  max-width: 820px; margin: 0 auto;
+  padding: 60px 48px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 14px;
+}
+.show-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 300; line-height: 1.05;
+  color: var(--cream); margin-bottom: 20px;
+}
+.run-progress {
+  display: flex; align-items: center; gap: 16px;
+}
+.run-pips {
+  display: flex; gap: 5px;
+}
+.pip {
+  width: 20px; height: 3px; border-radius: 2px;
+  background: var(--dim); transition: background 0.3s;
+}
+.pip.done { background: var(--amber); }
+.pip.tonight { background: var(--amber); opacity: 0.5; }
+.run-label {
+  font-size: 12px; color: var(--fog); letter-spacing: 0.06em;
+}
+.run-unlock-note {
+  font-size: 11px; color: var(--fog); margin-top: 12px;
+  opacity: 0.6; letter-spacing: 0.04em;
+}
+
+/* ── BODY ── */
+.body {
+  max-width: 820px; margin: 0 auto;
+  padding: 48px 48px 80px;
+}
+
+/* ── TONIGHT BLOCK ── */
+.tonight-block {
+  margin-bottom: 52px;
+}
+.section-label {
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--fog); margin-bottom: 20px;
+}
+
+.tonight-state {
+  padding: 28px 32px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.tonight-state.live {
+  border-color: rgba(201,127,69,0.25);
+}
+
+.tonight-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--cream); margin-bottom: 6px;
+}
+.tonight-meta {
+  font-size: 12px; color: var(--fog); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.tonight-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.btn-primary {
+  padding: 11px 24px;
+  background: transparent;
+  border: 1px solid var(--amber); border-radius: 2px;
+  color: var(--amber); font-family: 'Outfit', sans-serif;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--amber-s); }
+.btn-secondary {
+  padding: 11px 24px;
+  background: transparent;
+  border: 1px solid var(--border); border-radius: 2px;
+  color: var(--mist); font-family: 'Outfit', sans-serif;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+  text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn-secondary:hover { border-color: var(--mist); color: var(--cream); }
+
+.create-block {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+}
+.create-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 18px; color: var(--mist);
+}
+
+/* ── QR PANEL ── */
+.qr-panel {
+  display: none;
+  margin-top: 24px;
+  padding: 24px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border); border-radius: 2px;
+  flex-direction: column; align-items: flex-start; gap: 16px;
+}
+.qr-panel.visible { display: flex; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none} }
+.qr-canvas-wrap {
+  background: white; padding: 12px; border-radius: 2px;
+  display: inline-block;
+}
+.qr-url {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; color: var(--amber); letter-spacing: 0.04em;
+}
+.qr-note {
+  font-size: 12px; color: var(--fog); line-height: 1.6; max-width: 360px;
+}
+.qr-copy {
+  padding: 8px 18px;
+  border: 1px solid var(--border); border-radius: 2px; background: transparent;
+  font-family: 'Outfit', sans-serif; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--mist); cursor: pointer; transition: all 0.2s;
+}
+.qr-copy:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ── PAST PERFORMANCES ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+.perf-list { display: flex; flex-direction: column; gap: 10px; }
+.perf-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  background: rgba(255,255,255,0.015);
+  border: 1px solid var(--border); border-radius: 2px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.perf-item:hover {
+  border-color: rgba(201,127,69,0.2);
+  background: var(--amber-s);
+}
+.perf-left {}
+.perf-night {
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 5px;
+}
+.perf-date {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; color: var(--cream); font-weight: 300;
+}
+.perf-responses {
+  font-size: 12px; color: var(--fog); margin-top: 3px;
+}
+.perf-arrow {
+  font-size: 16px; color: var(--fog); transition: all 0.2s;
+}
+.perf-item:hover .perf-arrow {
+  transform: translateX(4px); color: var(--amber);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  padding: 40px 0; text-align: center;
+}
+.empty-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 18px; color: var(--fog);
+}
+
+/* ── LOADING ── */
+.thinking {
+  display: flex; gap: 6px; align-items: center;
+  padding: 32px 0;
+}
+.thinking span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--amber);
+  animation: tpulse 1.2s ease infinite;
+}
+.thinking span:nth-child(2){animation-delay:0.15s}
+.thinking span:nth-child(3){animation-delay:0.3s}
+@keyframes tpulse{0%,80%,100%{opacity:0.2}40%{opacity:1}}
+
+/* HOW IT WORKS OVERLAY */
+.hiw-trigger {
+  background: none; border: none; padding: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--fog); cursor: pointer;
+  transition: color 0.2s;
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: var(--dim);
+}
+.hiw-trigger:hover { color: var(--amber); text-decoration-color: var(--amber); }
+
+.hiw-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(12,11,9,0.94);
+  backdrop-filter: blur(16px);
+  overflow-y: auto;
+}
+.hiw-overlay.open {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.hiw-inner {
+  max-width: 560px; margin: 0 auto;
+  padding: 80px 48px;
+  animation: slideUp 0.35s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.hiw-close {
+  position: fixed; top: 24px; right: 32px;
+  background: none; border: none;
+  font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--fog); cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: color 0.2s;
+}
+.hiw-close:hover { color: var(--amber); }
+
+.hiw-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px; font-weight: 300;
+  color: var(--cream); margin-bottom: 48px;
+}
+
+.hiw-step {
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.hiw-step:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+.hiw-step-num {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+}
+.hiw-step-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 300;
+  color: var(--cream); margin-bottom: 10px;
+}
+.hiw-step-body {
+  font-size: 14px; color: var(--fog); line-height: 1.8;
+}
+
+.hiw-footer {
+  margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--fog); line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">How Did It Go <em>Tonight</em></div>
+  <button class="hiw-trigger" onclick="openHiw()">How it works</button>
+</nav>
+
+<div style="position:relative;z-index:1;">
+
+  <!-- HERO: SHOW ANCHOR -->
+  <div class="hero">
+    <div class="eyebrow">Your production</div>
+    <h1 class="show-title" id="show-title">Loading…</h1>
+    <div class="run-progress">
+      <div class="run-pips" id="run-pips"></div>
+      <span class="run-label" id="run-label"></span>
+    </div>
+    <p class="run-unlock-note" id="run-unlock-note"></p>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- TONIGHT -->
+    <div class="tonight-block">
+      <div class="section-label">Tonight</div>
+      <div id="tonight-zone">
+        <div class="thinking"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- PAST PERFORMANCES -->
+    <div>
+      <div class="section-label">The run</div>
+      <div id="past-zone">
+        <div class="thinking"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────────
+// These are set once per production. In production, read from URL params or auth.
+const SHOW_ID        = ""; // Will be set after show loads
+const SUPABASE_URL   = "https://gbqsuswghstsskvprkvu.supabase.co";
+const SUPABASE_ANON  = ""; // Anon key - safe for read-only public queries
+const MAX_PERFORMANCES = 10;
+const MIN_RUN        = 5;
+const BASE_URL       = window.location.origin;
+
+// ── SUPABASE FETCH HELPER ──────────────────────────────────────────────────────
+async function sb(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      "apikey": SUPABASE_ANON,
+      "Authorization": `Bearer ${SUPABASE_ANON}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+  return res.json();
+}
+
+// ── LOAD PRODUCTION ────────────────────────────────────────────────────────────
+async function loadProduction() {
+  try {
+    // For MVP: load the single show and its performances
+    const response = await fetch("/api/get-production");
+    const data = await response.json();
+
+    if (data.error || !data.show) {
+      renderNoShow();
+      return;
+    }
+
+    renderHero(data.show, data.performances);
+    renderTonight(data.show, data.performances, data.tonight);
+    renderPast(data.show, data.performances);
+
+  } catch(e) {
+    // Fallback to demo data if API not ready
+    renderDemo();
+  }
+}
+
+// ── RENDER HERO ────────────────────────────────────────────────────────────────
+function renderHero(show, performances) {
+  document.getElementById('show-title').textContent = show.title;
+
+  const completed = performances.filter(p => p.status === 'locked').length;
+  const total = MAX_PERFORMANCES;
+
+  // Pips
+  const pips = document.getElementById('run-pips');
+  pips.innerHTML = Array.from({length: total}, (_, i) => {
+    let cls = 'pip';
+    if (i < completed) cls += ' done';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  document.getElementById('run-label').textContent =
+    `${completed} of ${total} performances`;
+
+  const note = document.getElementById('run-unlock-note');
+  if (completed < MIN_RUN) {
+    note.textContent = `Run insights unlock after ${MIN_RUN} performances`;
+  } else {
+    note.textContent = `Run insights available →`;
+  }
+}
+
+// ── RENDER TONIGHT ─────────────────────────────────────────────────────────────
+function renderTonight(show, performances, tonight) {
+  const zone = document.getElementById('tonight-zone');
+  const completed = performances.filter(p => p.status !== 'open').length;
+  const nextNum = completed + 1;
+
+  if (nextNum > MAX_PERFORMANCES) {
+    zone.innerHTML = `
+      <div class="tonight-state">
+        <p class="tonight-name" style="color:var(--fog);">Run complete.</p>
+        <p style="font-size:13px;color:var(--fog);margin-top:8px;">All 10 performances have been recorded. Your run reading is available in the director dashboard.</p>
+      </div>`;
+    return;
+  }
+
+  if (tonight && tonight.status === 'open') {
+    // Performance exists and is open
+    zone.innerHTML = `
+      <div class="tonight-state live">
+        <div class="tonight-meta">
+          <div class="status-dot"></div>
+          <span>Performance ${tonight.performance_number} · Live · ${tonight.responses_count || 0} responses</span>
+        </div>
+        <div class="tonight-name">${show.title} — Performance ${tonight.performance_number}</div>
+        <div class="tonight-actions" style="margin-top:16px;">
+          <button class="btn-primary" onclick="showQR('${tonight.id}', ${tonight.performance_number})">Show QR</button>
+          <a class="btn-secondary" href="director.html?performance_id=${tonight.id}&show_name=${encodeURIComponent(show.title)}&perf_label=Performance+${tonight.performance_number}">Open Reading →</a>
+        </div>
+        <div class="qr-panel" id="qr-panel">
+          <div class="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+          <div class="qr-url" id="qr-url"></div>
+          <p class="qr-note">Display this QR in the venue or share the link. The window stays open until you close it.</p>
+          <button class="qr-copy" onclick="copyQR()">Copy link</button>
+        </div>
+      </div>`;
+  } else {
+    // No performance tonight yet
+    zone.innerHTML = `
+      <div class="tonight-state">
+        <div class="create-block">
+          <p class="create-label">No performance created for tonight yet.</p>
+          <button class="btn-primary" onclick="createPerformance('${show.id}', '${show.title}', '${show.venue || ''}', '${show.director_email || ''}', ${nextNum})">
+            Create Performance ${nextNum}
+          </button>
+        </div>
+      </div>`;
+  }
+}
+
+// ── RENDER PAST ────────────────────────────────────────────────────────────────
+function renderPast(show, performances) {
+  const zone = document.getElementById('past-zone');
+  const past = performances
+    .filter(p => p.status === 'locked')
+    .sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+  if (past.length === 0) {
+    zone.innerHTML = `
+      <div class="empty-state">
+        <p class="empty-text">No completed performances yet. Your run will appear here.</p>
+      </div>`;
+    return;
+  }
+
+  zone.innerHTML = `<div class="perf-list">${past.map(p => {
+    const date = new Date(p.datetime).toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    return `
+      <a class="perf-item" href="director.html?performance_id=${p.id}&show_name=${encodeURIComponent(show.title)}&perf_label=Performance+${p.performance_number}">
+        <div class="perf-left">
+          <div class="perf-night">Performance ${p.performance_number}</div>
+          <div class="perf-date">${date}</div>
+          <div class="perf-responses">${p.responses_count || 0} responses</div>
+        </div>
+        <div class="perf-arrow">→</div>
+      </a>`;
+  }).join('')}</div>`;
+}
+
+// ── CREATE PERFORMANCE ─────────────────────────────────────────────────────────
+async function createPerformance(show_id, show_title, venue, director_email, nextNum) {
+  const zone = document.getElementById('tonight-zone');
+  zone.innerHTML = `<div class="thinking"><span></span><span></span><span></span></div>`;
+
+  try {
+    const res = await fetch("/api/create-performance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ show_id, show_title, venue, director_email }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Reload production to reflect new performance
+    loadProduction();
+  } catch(e) {
+    zone.innerHTML = `<p style="color:var(--warn-c);font-size:13px;">Something went wrong. Try again.</p>`;
+    console.error(e);
+  }
+}
+
+// ── QR ─────────────────────────────────────────────────────────────────────────
+function showQR(performance_id, perf_num) {
+  const panel = document.getElementById('qr-panel');
+  panel.classList.toggle('visible');
+
+  if (panel.classList.contains('visible')) {
+    const url = `${BASE_URL}/audience.html?performance_id=${performance_id}`;
+    document.getElementById('qr-url').textContent = url;
+    QRCode.toCanvas(document.getElementById('qr-canvas'), url, {
+      width: 140, margin: 1,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+  }
+}
+
+function copyQR() {
+  const url = document.getElementById('qr-url').textContent;
+  navigator.clipboard.writeText(url).catch(() => {});
+  event.target.textContent = 'Copied';
+  setTimeout(() => event.target.textContent = 'Copy link', 1500);
+}
+
+// ── DEMO FALLBACK ──────────────────────────────────────────────────────────────
+// Shows demo state if API not yet wired
+function renderDemo() {
+  const demoShow = { id: 'demo', title: 'Hamlet', venue: 'Barbican Theatre, London', director_email: '' };
+  const demoPerfs = [
+    { id: 'p1', performance_number: 1, datetime: '2026-04-16T19:00:00', status: 'locked', responses_count: 11 },
+    { id: 'p2', performance_number: 2, datetime: '2026-04-17T19:00:00', status: 'locked', responses_count: 18 },
+    { id: 'p3', performance_number: 3, datetime: '2026-04-18T19:00:00', status: 'locked', responses_count: 22 },
+  ];
+  const demoTonight = {
+    id: 'ba38aab7-42f9-4cf5-8abc-021db419c82a',
+    performance_number: 4,
+    status: 'open',
+    responses_count: 14,
+  };
+
+  renderHero(demoShow, demoPerfs);
+  renderTonight(demoShow, demoPerfs, demoTonight);
+  renderPast(demoShow, demoPerfs);
+}
+
+function renderNoShow() {
+  document.getElementById('show-title').textContent = 'No production found.';
+  document.getElementById('tonight-zone').innerHTML = `
+    <p style="font-size:14px;color:var(--fog);">Set up your production to get started.</p>`;
+  document.getElementById('past-zone').innerHTML = '';
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+loadProduction();
+</script>
+
+<!-- HOW IT WORKS OVERLAY -->
+<div class="hiw-overlay" id="hiw">
+  <button class="hiw-close" onclick="closeHiw()">Close</button>
+  <div class="hiw-inner">
+    <h2 class="hiw-title">How it works</h2>
+
+    <div class="hiw-step">
+      <p class="hiw-step-num">1</p>
+      <p class="hiw-step-heading">Set up your performance</p>
+      <p class="hiw-step-body">Create a performance for tonight. This gives you a private link for your audience.</p>
+    </div>
+
+    <div class="hiw-step">
+      <p class="hiw-step-num">2</p>
+      <p class="hiw-step-heading">Share it in the room</p>
+      <p class="hiw-step-body">Place it where people can access it privately, or send the link directly. Give them space to respond on their own, without being put on the spot.</p>
+    </div>
+
+    <div class="hiw-step">
+      <p class="hiw-step-num">3</p>
+      <p class="hiw-step-heading">Let responses come in</p>
+      <p class="hiw-step-body">Responses collect while the window is open. You can keep it open as long as you want.</p>
+    </div>
+
+    <div class="hiw-step">
+      <p class="hiw-step-num">4</p>
+      <p class="hiw-step-heading">Close and generate</p>
+      <p class="hiw-step-body">When you are ready, generate the reading. All responses are combined into a single collective view.</p>
+    </div>
+
+    <div class="hiw-step">
+      <p class="hiw-step-num">5</p>
+      <p class="hiw-step-heading">Read what the room experienced</p>
+      <p class="hiw-step-body">You do not read individual responses. You read the room.</p>
+    </div>
+
+    <div class="hiw-footer">
+      No setup needed beyond this. You can run your first performance in a few minutes.
+    </div>
+  </div>
+</div>
+
+<script>
+function openHiw() {
+  document.getElementById('hiw').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeHiw() {
+  document.getElementById('hiw').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('hiw').addEventListener('click', function(e) {
+  if (e.target === this) closeHiw();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeHiw();
+});
+</script>
+</body>
+</html>

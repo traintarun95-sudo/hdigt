@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Did It Go Tonight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0c0b09;
+  --cream:   #e8e0d0;
+  --amber:   #c97f45;
+  --amber-s: rgba(201,127,69,0.09);
+  --fog:     #7a7067;
+  --mist:    #a89f93;
+  --dim:     #1e1c18;
+  --border:  rgba(255,255,255,0.07);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 800px 500px at 50% 80%, rgba(201,127,69,0.055) 0%, transparent 70%);
+}
+
+/* NAV */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  background: rgba(12,11,9,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--fog);
+}
+.nav-logo em { color: var(--amber); font-style: normal; }
+.nav-cta {
+  padding: 9px 22px;
+  border: 1px solid var(--amber); border-radius: 2px;
+  background: transparent; color: var(--amber);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-cta:hover { background: var(--amber-s); }
+
+/* HERO */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  padding: 120px 48px 80px;
+  max-width: 900px; margin: 0 auto;
+}
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 28px;
+  opacity: 0; animation: fadeUp 0.8s 0.2s ease forwards;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 300; line-height: 1.08;
+  color: var(--cream); margin-bottom: 32px;
+  opacity: 0; animation: fadeUp 0.8s 0.35s ease forwards;
+}
+.hero-title em { font-style: italic; color: var(--mist); }
+.hero-body {
+  max-width: 560px;
+  opacity: 0; animation: fadeUp 0.8s 0.5s ease forwards;
+}
+.hero-body p {
+  font-size: 17px; line-height: 1.8; color: var(--mist);
+  margin-bottom: 16px;
+}
+.hero-body p:last-child { margin-bottom: 0; color: var(--fog); font-size: 15px; }
+
+.hero-action {
+  margin-top: 48px;
+  opacity: 0; animation: fadeUp 0.8s 0.65s ease forwards;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 36px;
+  background: var(--amber); border: none; border-radius: 2px;
+  color: #0c0b09;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.2s;
+}
+.cta-btn:hover { background: #d99060; transform: translateY(-1px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* DIVIDER LINE */
+.section-rule {
+  max-width: 900px; margin: 0 auto;
+  border: none; border-top: 1px solid var(--border);
+}
+
+/* SECTIONS */
+.section {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 80px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 28px;
+}
+
+.section-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 300; line-height: 1.2;
+  color: var(--cream); margin-bottom: 24px;
+}
+.section-heading em { font-style: italic; color: var(--mist); }
+
+.section-body p {
+  font-size: 16px; line-height: 1.85;
+  color: var(--mist); margin-bottom: 16px;
+  max-width: 600px;
+}
+.section-body p:last-child { margin-bottom: 0; }
+
+/* TWO SIDES */
+.two-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px; margin-top: 8px;
+}
+@media (max-width: 640px) {
+  .two-sides { grid-template-columns: 1fr; gap: 32px; }
+}
+.side-label {
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--fog); margin-bottom: 14px;
+}
+.side-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; line-height: 1.75;
+  color: var(--cream); font-weight: 300;
+}
+
+/* WHAT EMERGES */
+.emerges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px; margin-top: 8px;
+}
+@media (max-width: 640px) {
+  .emerges-grid { grid-template-columns: 1fr; }
+}
+.emerges-item {
+  padding: 28px 24px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+}
+.emerges-num {
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+}
+.emerges-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; line-height: 1.65;
+  color: var(--mist);
+}
+
+/* FOR */
+.for-grid {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
+}
+.for-tag {
+  padding: 8px 18px;
+  border: 1px solid var(--border); border-radius: 2px;
+  font-size: 13px; color: var(--fog); letter-spacing: 0.04em;
+}
+
+/* PRIVACY NOTE */
+.privacy-block {
+  padding: 28px 32px;
+  background: rgba(255,255,255,0.015);
+  border: 1px solid var(--border); border-radius: 2px;
+  margin-top: 8px;
+}
+.privacy-block p {
+  font-size: 14px; color: var(--fog); line-height: 1.8;
+  margin-bottom: 10px;
+}
+.privacy-block p:last-child { margin-bottom: 0; }
+
+/* FINAL CTA */
+.final-cta {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 80px 48px 120px;
+  text-align: center;
+}
+.final-cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 300; color: var(--cream);
+  margin-bottom: 14px;
+}
+.final-cta-sub {
+  font-size: 15px; color: var(--fog);
+  margin-bottom: 40px; line-height: 1.7;
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .nav { padding: 16px 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .section { padding: 60px 24px; }
+  .final-cta { padding: 60px 24px 80px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">How Did It Go <em>Tonight</em></div>
+  <a href="production.html" class="nav-cta">Get started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Live performance reflection</p>
+  <h1 class="hero-title">
+    How did it go<br><em>tonight?</em>
+  </h1>
+  <div class="hero-body">
+    <p>After something live ends, people carry an impression with them. Most of it never reaches the people who made the work.</p>
+    <p>What does reach them is usually shaped by politeness, or the awkwardness of the moment, or simply not knowing how to say it. The honest reaction stays private.</p>
+    <p>What actually happened in the room disappears.</p>
+    <p>This creates a way for it to stay briefly.</p>
+  </div>
+  <div class="hero-action">
+    <a href="production.html" class="cta-btn">Start with your next performance</a>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <p class="section-label">How it works</p>
+  <h2 class="section-heading">A simple QR opens<br><em>a quiet space</em></h2>
+  <div class="section-body">
+    <p>Audience members can say what they felt, in their own words, without being seen and without needing to perform an opinion.</p>
+    <p>No ratings. No pressure. No exposure. Just a moment to respond honestly.</p>
+  </div>
+</section>
+
+<!-- TWO SIDES -->
+<section class="section">
+  <p class="section-label">Two sides of the same moment</p>
+  <div class="two-sides">
+    <div>
+      <p class="side-label">For the audience</p>
+      <p class="side-text">A way to express what was felt, without consequence. Anonymous, unhurried, and on their own terms.</p>
+    </div>
+    <div>
+      <p class="side-label">For the makers</p>
+      <p class="side-text">A way to understand how the work actually landed. Not individual feedback. A reading of the whole room.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT EMERGES -->
+<section class="section">
+  <p class="section-label">What emerges</p>
+  <h2 class="section-heading">After each performance</h2>
+  <div class="emerges-grid">
+    <div class="emerges-item">
+      <p class="emerges-num">01</p>
+      <p class="emerges-text">The overall experience of the room</p>
+    </div>
+    <div class="emerges-item">
+      <p class="emerges-num">02</p>
+      <p class="emerges-text">Where meaning was clear or fractured</p>
+    </div>
+    <div class="emerges-item">
+      <p class="emerges-num">03</p>
+      <p class="emerges-text">How the work came together in the room</p>
+    </div>
+    <div class="emerges-item">
+      <p class="emerges-num">04</p>
+      <p class="emerges-text">What remained after it ended</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading" style="margin-top:48px;">Across performances</h2>
+  <div class="emerges-grid">
+    <div class="emerges-item">
+      <p class="emerges-num">01</p>
+      <p class="emerges-text">What is consistent night after night</p>
+    </div>
+    <div class="emerges-item">
+      <p class="emerges-num">02</p>
+      <p class="emerges-text">What keeps shifting or refusing to resolve</p>
+    </div>
+    <div class="emerges-item">
+      <p class="emerges-num">03</p>
+      <p class="emerges-text">How the audience's understanding evolves over the run</p>
+    </div>
+  </div>
+</section>
+
+<!-- MADE FOR -->
+<section class="section">
+  <p class="section-label">Made for live work</p>
+  <div class="section-body">
+    <p>Anything that happens once and changes each time.</p>
+  </div>
+  <div class="for-grid" style="margin-top:24px;">
+    <span class="for-tag">Theatre</span>
+    <span class="for-tag">Dance</span>
+    <span class="for-tag">Music</span>
+    <span class="for-tag">Workshops</span>
+    <span class="for-tag">Performance art</span>
+    <span class="for-tag">Spoken word</span>
+    <span class="for-tag">Comedy</span>
+    <span class="for-tag">Opera</span>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section class="section">
+  <p class="section-label">Designed to be held lightly</p>
+  <div class="privacy-block">
+    <p>Responses are anonymous. Individual words are not surfaced or attributed.</p>
+    <p>They become part of a collective synthesis and are not accessed separately afterward.</p>
+    <p>The production reads the room. Not the people in it.</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="final-cta">
+  <h2 class="final-cta-title">Start with your next performance</h2>
+  <p class="final-cta-sub">No setup needed beyond this. You can run your first performance in a few minutes.</p>
+  <a href="production.html" class="cta-btn">Get started</a>
+</div>
+
+</body>
+</html>
